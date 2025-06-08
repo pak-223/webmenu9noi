@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เมนูอาหาร - นายน้อยข้าวไข่ข้น</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for category tabs (optional, but good for aesthetics) */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 font-sans text-gray-800">
+
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm sticky top-0 z-40 rounded-b-lg">
+        <div class="flex items-center justify-between p-4">
+            <div class="flex-1 text-center">
+                <h1 class="font-bold text-2xl text-green-700">นายน้อยข้าวไข่ข้น</h1>
+                <div class="flex items-center justify-center text-sm text-gray-600 mt-1">
+                    <!-- Star icon (using SVG directly as Lucide-react is for React) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star w-4 h-4 text-yellow-400 mr-1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span>4.5 • </span>
+                    <!-- Clock icon (using SVG directly) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock w-4 h-4 ml-2 mr-1"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>25-35 นาที</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="px-4 pb-4">
+            <div class="relative">
+                <!-- Search icon (using SVG directly) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input
+                    type="text"
+                    id="searchTerm"
+                    placeholder="ค้นหาเมนูอาหาร..."
+                    class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow text-base"
+                    onkeyup="filterMenuItems()"
+                />
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="bg-white border-b py-3 shadow-sm rounded-lg mx-2 my-4">
+        <div id="categoryTabs" class="flex overflow-x-auto px-4 space-x-2 no-scrollbar">
+            <!-- Categories will be rendered here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Menu Items Section -->
+    <div id="menuItemsContainer" class="p-4 space-y-4">
+        <!-- Menu items will be rendered here by JavaScript -->
+    </div>
+
+    <script>
+        // Hardcoded menu items derived from the provided CSV data.
+        const menuItems = [
+            {
+                id: 'THITE20250607101828047027',
+                name: 'ข้าวหอมมะลิ+ไข่ข้นเบคอนทอดกระเทียม',
+                price: 99,
+                category: 'ข้าวไข่ข้น ทอดกระเทียม',
+                description: 'ไข่ข้นเนื้อเนียนราดบนข้าวหอมมะลิ เสิร์ฟพร้อมเบคอนทอดกรอบ ราดกระเทียมเจียวหอมฉุย เพิ่มความกลมกล่อม',
+                image: 'https://food-cms.grab.com/item/THITE20250607101828047027/photos/e67d20f2366e4fe09065b6651b8426a7_1749291508291199328.jpeg',
+            },
+            {
+                id: 'THITE20250607101831205466',
+                name: 'ข้าวหอมมะลิ+ห่อหมกไข่ข้นทะเล',
+                price: 99,
+                category: 'ข้าวไข่ข้นห่อหมก',
+                description: 'ข้าวหอมมะลิห่อด้วยไข่ข้น สอดไส้ทะเลรวม หวานมัน เผ็ดกลมกล่อม ได้กลิ่นเครื่องแกงใต้',
+                image: 'https://food-cms.grab.com/item/THITE20250607101831205466/photos/fd78335aab7d47f786e53bf3d46bbe8f_1749291511304272485.jpeg',
+            },
+            {
+                id: 'THITE20250607101829103154',
+                name: 'กะเพรากุ้ง',
+                price: 89,
+                category: 'กะเพราเด็ดนายน้อย',
+                description: 'กุ้งสดเด้งผัดกับพริกขี้หนูและกระเพรา มอบรสเผ็ดร้อนและกลิ่นหอมของสมุนไพรไทย',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101829103154/photos/e50bc49d0bad4c69b45aa0930583e692_1749291509433736279.jpeg',
+            },
+            {
+                id: 'THITE20250607101828075733',
+                name: 'กะเพราหมูชิ้น',
+                price: 69,
+                category: 'กะเพราเด็ดนายน้อย',
+                description: 'หมูชิ้นสไลซ์หนา ผัดกับพริกขี้หนูและกระเพรา เพิ่มรสเผ็ดร้อนเค็มกลมกล่อม พร้อมกลิ่นหอมใบกะเพราแท้',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101828075733/photos/a1c15920c62744bb87f0add8dc9b240b_1749291508901628367.jpeg',
+            },
+            {
+                id: 'THITE20250607101828059916',
+                name: 'ข้าวหอมมะลิ+ไข่ข้นกุ้งทอดกระเทียม',
+                price: 99,
+                category: 'ข้าวไข่ข้น ทอดกระเทียม',
+                description: 'ไข่ข้นเนียนลื่นผสานบนข้าวหอมมะลิ เสิร์ฟพร้อมกุ้งทอดกระเทียม ให้รสชาติหวานมันเค็มกรอบอย่างลงตัว',
+                image: 'https://food-cms.grab.com/item/THITE20250607101828059916/photos/64b3a1c4348c48acad1c5bef0602b09c_1749291508460521618.jpeg',
+            },
+            {
+                id: 'THITE20250607101830155451',
+                name: 'สปาเก็ตตี้กะเพรากุ้ง',
+                price: 149,
+                category: 'สปาเก็ตตี้กะเพรา',
+                description: 'เส้นสปาเก็ตตี้ผัดกับกุ้งสดพริกขี้หนูและกระเพรา มอบรสจัดจ้านและกลิ่นหอมทะเล',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101830155451/photos/3ec3d4b3b22f47c09c9c03317276e98e_1749291510388832728.jpeg',
+            },
+            {
+                id: 'THITE20250607101831216126',
+                name: 'ผลไม้สดปอกพร้อมทาน 4 ชนิดคละตามฤดูกาล',
+                price: 69,
+                category: 'ผลไม้สด',
+                description: 'รวมผลไม้สดฉ่ำฉ่ำ  4 ชนิด จะเป็นผลไม้ตามฤดูกาล โดยผลไม้แต่ละวันจะแตกต่างกันไป',
+                image: 'https://food-cms.grab.com/item/THITE20250607101831216126/photos/menueditor_item_18a3a6f16efb4bd79be4d7b98d2f5c2f_1749292024418570039.jpg',
+            },
+            {
+                id: 'THITE20250607101831238923',
+                name: 'แตงโมปอกพร้อมทาน',
+                price: 60,
+                category: 'ผลไม้สด',
+                description: 'แตงโม อร่อย ฉ่ำ ปอกพร้อมทาน',
+                image: 'https://food-cms.grab.com/item/THITE20250607101831238923/photos/menueditor_item_39b7461e42ff4e87a4134fe63061f934_1749291912589335319.jpg',
+            },
+            {
+                id: 'THITE20250607101830162409',
+                name: 'สปาเก็ตตี้กะเพราหมึก',
+                price: 149,
+                category: 'สปาเก็ตตี้กะเพรา',
+                description: 'สปาเก็ตตี้คลุกเคล้ากับหมึกสดและกระเพรา รสจัดจ้าน หวานนิดเค็มหน่อย กลิ่นหอมสมุนไพร',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101830162409/photos/38258fab3cb74ebaa3299207a82d771a_1749291510584447361.jpeg',
+            },
+            {
+                id: 'THITE20250607101831221627',
+                name: 'แอปเปิ้ลปอกพร้อมทาน',
+                price: 60,
+                category: 'ผลไม้สด',
+                description: 'แอปเปิ้ลสด สีสันสวยงาม หวานกรอบพร้อมทาน',
+                image: 'https://food-cms.grab.com/item/THITE20250607101831221627/photos/menueditor_item_6d29a27014164ed2a2fc11ae95a9d4e1_1749291967774949322.jpg',
+            },
+            {
+                id: 'THITE20250607101829112940',
+                name: 'กะเพราหมึก',
+                price: 89,
+                category: 'กะเพราเด็ดนายน้อย',
+                description: 'หมึกสดกรอบผัดกระเพรารสจัด ราดด้วยน้ำมันหอยเล็กน้อย เพิ่มรสกลมกล่อมและความหอมของกระเพรา',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101829112940/photos/cf4cac4a97404815b6f68d57a716dcdb_1749291509586307764.jpeg',
+            },
+            {
+                id: 'THITE20250607101831246086',
+                name: 'ส้มแมนดารินปอกพร้อมทาน',
+                price: 60,
+                category: 'ผลไม้สด',
+                description: 'ส้มแมนดาริน สดๆ สะอาด ปอกให้พร้อมทาน',
+                image: 'https://food-cms.grab.com/item/THITE20250607101831246086/photos/menueditor_item_a9580fa2ada142faac6d223b3d4b3b64_1749291856673071005.jpg',
+            },
+            {
+                id: 'THITE20250607101831250967',
+                name: 'ฝรั่งกิมจูปอกพร้อมทาน',
+                price: 60,
+                category: 'ผลไม้สด',
+                description: 'ฝรั่งกิมจูสดๆ กรอบ อร่อย ปอกพร้อมทาน',
+                image: 'https://food-cms.grab.com/item/THITE20250607101831250967/photos/menueditor_item_c283b76ac5944f728eb51b76fcebdaff_1749291786310643903.jpg',
+            },
+            {
+                id: 'THITE20250607101830136048',
+                name: 'สปาเก็ตตี้กะเพราเบคอน',
+                price: 149,
+                category: 'สปาเก็ตตี้กะเพรา',
+                description: 'สปาเก็ตตี้เส้นเหนียวนุ่ม ผัดกับเบคอนกรอบพริกขี้หนูและใบกะเพรา รสจัดจ้านกลมกล่อม',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101830136048/photos/c5c13942080f4163933307f52a24b219_1749291510017200586.jpeg',
+            },
+            {
+                id: 'THITE20250607101829098489',
+                name: 'กะเพราเนื้อสับออสเตรเลีย',
+                price: 129,
+                category: 'กะเพราเด็ดนายน้อย',
+                description: 'เนื้อสับออสเตรเลียผัดกระเพรารสเข้มข้น ให้รสชาติเนื้อเนียน ๆ ผสานความเผ็ดร้อนและกลิ่นหอมของใบกะเพรา',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101829098489/photos/3304eaf7086c44ca8160d9a35e1bdb7c_1749291509277542087.jpeg',
+            },
+            {
+                id: 'THITE20250607101827023617',
+                name: 'ข้าวหอมมะลิ+ไข่ข้นหมูสับทอดกระเทียม',
+                price: 89,
+                category: 'ข้าวไข่ข้น ทอดกระเทียม',
+                description: 'ข้าวหอมมะลินุ่มราดไข่ข้นลื่นกลมกล่อม เสิร์ฟพร้อมหมูสับทอดกระเทียมหอมกรอบ เพิ่มมิติความอร่อย',
+                image: 'https://food-cms.grab.com/item/THITE20250607101827023617/photos/4918d7e8f5e74775be9ad61febd36ce9_1749291508000517172.jpeg',
+            },
+            {
+                id: 'THITE20250607101830142460',
+                name: 'สปาเก็ตตี้กะเพราหมูสับ',
+                price: 139,
+                category: 'สปาเก็ตตี้กะเพรา',
+                description: 'เส้นสปาเก็ตตี้ผัดกับหมูสับและกระเพรา รสจัด เผ็ดร้อน เคล้ากลิ่นหอมของสมุนไพร',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101830142460/photos/c2358496f1f44fa99d8ef8fec16e70c6_1749291510140832547.jpeg',
+            },
+            {
+                id: 'THITE20250607101830184557',
+                name: 'ข้าวหอมมะลิ+ห่อหมกไข่ข้นกุ้ง',
+                price: 99,
+                category: 'ข้าวไข่ข้นห่อหมก',
+                description: 'ข้าวหอมมะลิห่อด้วยไข่ข้นห่อด้วยไข่ข้นรสเข้ม เสิร์ฟพร้อมห่อหมกกุ้งเนื้อแน่น เผ็ดนิด ๆ หวานมัน',
+                image: 'https://food-cms.grab.com/item/THITE20250607101830184557/photos/73a40c4bbd5c4ee29db93587ec2cac7a_1749291510941373744.jpeg',
+            },
+            {
+                id: 'THITE20250607101830178652',
+                name: 'สปาเก็ตตี้กะเพราทะเลรวม',
+                price: 149,
+                category: 'สปาเก็ตตี้กะเพรา',
+                description: 'สปาเก็ตตี้รวมซีฟู้ด ผัดกะเพรารสจัด เคล้ากลิ่นหอมทะเลและใบกะเพรา',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101830178652/photos/5a329a1bfb644082a5daaf70f56c6b95_1749291510756808485.jpeg',
+            },
+            {
+                id: 'THITE20250607101829081858',
+                name: 'กะเพราหมูสับ',
+                price: 69,
+                category: 'กะเพราเด็ดนายน้อย',
+                description: 'หมูสับผัดร้อนกับพริกและกระเพรา รสชาติจัดจ้าน หอมกลิ่นกระเพรา',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101829081858/photos/90c609683c5746bbb33c07d09e706a0b_1749291509094445301.jpeg',
+            },
+            {
+                id: 'THITE20250607101828030835',
+                name: 'ข้าวหอมมะลิ+ไข่ข้นสามชั้นทอดกระเทียม',
+                price: 99,
+                category: 'ข้าวไข่ข้น ทอดกระเทียม',
+                description: 'ข้าวหอมมะลิร้อน ๆ ราดไข่ข้นเนียนนุ่ม พร้อมสามชั้นหมูทอดกระเทียมกรอบมัน ผสมผสานรสเค็มหวานอย่างลงตัว',
+                image: 'https://food-cms.grab.com/item/THITE20250607101828030835/photos/f839283ea70146cd9df90660a0602395_1749291508172427363.jpeg',
+            },
+            {
+                id: 'THITE20250607101827015838',
+                name: 'ข้าวหอมมะลิ+ไข่ข้นหมูชิ้นทอดกระเทียม',
+                price: 89,
+                category: 'ข้าวไข่ข้น ทอดกระเทียม',
+                description: 'ข้าวหอมมะลิ นุ่มราดด้วยไข่ข้นเนียน ๆ ท็อปด้วยหมูชิ้นทอดกรอบ ราดด้วยกระเทียมเจียวหอม ๆ ให้รสกลมกล่อมลงตัว',
+                image: 'https://food-cms.grab.com/item/THITE20250607101827015838/photos/5cb10df83786464b9991a95331cf22a6_1749291507846057663.jpeg',
+            },
+            {
+                id: 'THITE20250607101829120496',
+                name: 'กะเพราทะเลรวม',
+                price: 89,
+                category: 'กะเพราเด็ดนายน้อย',
+                description: 'รวมซีฟู้ดสด ทั้งกุ้ง หมึก และหอย ปรุงรสเข้มข้นกับพริกและกระเพรา ให้รสชาติทะเลหอมกรุ่น',
+                image: 'https://d1sag4ddilekf6.cloudfront.net/item/THITE20250607101829120496/photos/a537449c0c79412a9446f4dc938e1724_1749291509766172777.jpeg',
+            },
+            {
+                id: 'THITE20250607101831190487',
+                name: 'ข้าวหอมมะลิ+ห่อหมกไข่ข้นหมึก',
+                price: 99,
+                category: 'ข้าวไข่ข้นห่อหมก',
+                description: 'ข้าวหอมมะลิห่อด้วยไข่ข้นเนียนนุ่ม ท็อปด้วยห่อหมกหมึก รสเผ็ดกลมกล่อม กลิ่นแกงใต้หอมชวนกิน',
+                image: 'https://food-cms.grab.com/item/THITE20250607101831190487/photos/90d50de0edba452c9d64dbb617786a5f_1749291511138963222.jpeg',
+            },
+            {
+                id: 'THITE20250607101828064013',
+                name: 'ข้าวหอมมะลิ+ไข่ข้นหมึกทอดกระเทียม',
+                price: 99,
+                category: 'ข้าวไข่ข้น ทอดกระเทียม',
+                description: 'ข้าวหอมมะลิร้อน ๆ กับไข่ข้นเนียนนุ่ม ท็อปด้วยหมึกทอดกระเทียมหอมกรอบ มอบประสบการณ์รสชาติใหม่',
+                image: 'https://food-cms.grab.com/item/THITE20250607101828064013/photos/28576c62c4844b569256154897cf4830_1749291508630480741.jpeg',
+            }
+        ];
+
+        let selectedCategory = 'ทั้งหมด';
+        let searchTerm = '';
+
+        // Function to render a single menu item HTML
+        function renderMenuItem(item) {
+            return `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="flex">
+                        <div class="flex-1 p-4">
+                            <h3 class="font-semibold text-gray-900 mb-2 text-base">${item.name}</h3>
+                            <p class="text-gray-600 text-sm mb-3 line-clamp-2">${item.description}</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-lg font-bold text-green-600">฿${item.price}</span>
+                            </div>
+                        </div>
+                        <div class="w-28 h-28 flex-shrink-0 m-4 rounded-lg overflow-hidden">
+                            <img
+                                src="${item.image}"
+                                alt="${item.name}"
+                                class="w-full h-full object-cover"
+                                onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNNTAgNjVMNDAgNDBINjBMNTAgNjVaIiBmaWxsPSIjOUNBM0FGIi8+PC9zdmc+';"
+                            />
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Function to render all menu items based on filters
+        function renderMenuItems() {
+            const container = document.getElementById('menuItemsContainer');
+            if (!container) return;
+
+            const filteredItems = menuItems.filter(item => {
+                const matchesCategory = selectedCategory === 'ทั้งหมด' || item.category === selectedCategory;
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filteredItems.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-gray-600">
+                        <p class="text-lg">ไม่พบเมนูที่คุณค้นหา</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = filteredItems.map(renderMenuItem).join('');
+            }
+        }
+
+        // Function to render category tabs
+        function renderCategoryTabs() {
+            const categoryTabsContainer = document.getElementById('categoryTabs');
+            if (!categoryTabsContainer) return;
+
+            const uniqueCategories = ['ทั้งหมด', ...new Set(menuItems.map(item => item.category))];
+
+            categoryTabsContainer.innerHTML = uniqueCategories.map(category => `
+                <button
+                    onclick="selectCategory('${category}')"
+                    class="px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors duration-200
+                    ${selectedCategory === category ? 'bg-green-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
+                    ${category}
+                </button>
+            `).join('');
+        }
+
+        // Function to handle category selection
+        function selectCategory(category) {
+            selectedCategory = category;
+            renderCategoryTabs(); // Re-render tabs to update active state
+            renderMenuItems(); // Re-render menu items based on new category
+        }
+
+        // Function to handle search input
+        function filterMenuItems() {
+            searchTerm = document.getElementById('searchTerm').value.toLowerCase();
+            renderMenuItems(); // Re-render menu items based on new search term
+        }
+
+        // Initial render when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategoryTabs();
+            renderMenuItems();
+        });
+    </script>
+</body>
+</html>
