@@ -1,0 +1,52 @@
+/* Custom scrollbar for horizontal menu sections (optional, but good for aesthetics) */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+/* Custom styles for menu cards to ensure consistent width for horizontal scrolling */
+.menu-card {
+    flex: 0 0 auto; /* Prevent items from shrinking */
+    width: 280px; /* Fixed width for each card, adjust as needed */
+    scroll-snap-align: start; /* Optional: for smoother snapping effect */
+    transition: transform 0.2s ease-in-out; /* Smooth hover effect */
+}
+/* Responsive adjustments for menu card width on smaller screens */
+@media (max-width: 640px) {
+    .menu-card {
+        width: 240px; /* Slightly smaller width for mobile */
+    }
+}
+@media (max-width: 480px) {
+    .menu-card {
+        width: 200px; /* Even smaller for very small screens */
+    }
+}
+/* Background for header area - now solid red */
+.header-bg {
+    background-color: #DC2626; /* Solid red background */
+    color: white;
+    padding: 2rem 1rem; /* Adjust padding as needed */
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.7); /* Stronger text shadow for readability */
+    position: relative; /* Keep relative for z-index of search bar */
+}
+/* Remove overlay as there's no background image */
+.header-bg::before {
+    content: none;
+}
+.header-content {
+    position: relative;
+    z-index: 2; /* Place content above search bar if needed */
+}
+.footer-bg {
+    background-color: #333; /* Darker background for footer for better contrast */
+    color: white;
+    padding: 2.5rem 1.5rem; /* Increased padding */
+    font-size: 0.9rem; /* Slightly smaller font for compactness */
+}
+.footer-bg p {
+    margin-bottom: 0.5rem;
+}
+
