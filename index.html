@@ -111,6 +111,18 @@
         </div>
     </div>
 
+    <!-- Toppings selection modal -->
+    <div id="toppingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-4 w-11/12 max-w-sm">
+            <h2 class="text-lg font-bold text-center mb-2">เลือกท็อปปิ้ง</h2>
+            <div id="toppingsList" class="space-y-1 text-sm mb-2"></div>
+            <div class="mt-4 flex justify-end space-x-2">
+                <button onclick="confirmToppings()" class="bg-green-500 text-white px-3 py-1 rounded">ตกลง</button>
+                <button onclick="closeToppingsModal()" class="bg-gray-300 text-gray-700 px-3 py-1 rounded">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer Section (newly added) -->
     <div class="footer-bg mt-8 rounded-t-lg shadow-lg">
         <div class="max-w-4xl mx-auto p-6 text-center">
@@ -433,17 +445,50 @@
             }
         ];
 
+        const toppings = [
+            { name: 'ไข่ดาว', price: 10 },
+            { name: 'ไข่เจียว', price: 10 },
+            { name: 'ชีส', price: 15 },
+            { name: 'เพิ่มเนื้อพิเศษ', price: 20 }
+        ];
+
         let searchTerm = '';
         const order = {};
+        let currentItemId = null;
 
-        function addToOrder(id) {
+        function openToppingsModal(id) {
+            currentItemId = id;
+            const container = document.getElementById('toppingsList');
+            container.innerHTML = toppings.map(t => `
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" value="${t.name}" data-price="${t.price}" class="topping-checkbox">
+                    <span>${t.name} ฿${t.price}</span>
+                </label>
+            `).join('');
+            document.getElementById('toppingsModal').classList.remove('hidden');
+        }
+
+        function closeToppingsModal() {
+            document.getElementById('toppingsModal').classList.add('hidden');
+        }
+
+        function confirmToppings() {
+            const selected = Array.from(document.querySelectorAll('.topping-checkbox:checked')).map(cb => ({
+                name: cb.value,
+                price: Number(cb.dataset.price)
+            }));
+            addToOrder(currentItemId, selected);
+            closeToppingsModal();
+        }
+
+        function addToOrder(id, selectedToppings) {
             const item = menuItems.find(i => i.id === id);
             if (!item) return;
             if (!order[id]) {
-                order[id] = { item: item, qty: 0 };
+                order[id] = { item: item, qty: 0, toppings: [] };
             }
             order[id].qty++;
-            alert(`เพิ่ม ${item.name} แล้ว`);
+            order[id].toppings = selectedToppings;
         }
 
         function openOrderModal() {
@@ -460,11 +505,13 @@
             const totalEl = document.getElementById('orderTotal');
             list.innerHTML = '';
             let total = 0;
-            Object.values(order).forEach(({ item, qty }) => {
+            Object.values(order).forEach(({ item, qty, toppings }) => {
                 const li = document.createElement('li');
                 const itemPrice = typeof item.price === 'number' ? item.price : 0;
-                li.textContent = `${item.name} x${qty} ${itemPrice ? '฿' + (itemPrice * qty) : item.price}`;
-                total += itemPrice * qty;
+                const toppingPrice = (toppings || []).reduce((s, t) => s + t.price, 0);
+                const toppingText = (toppings || []).map(t => t.name).join(', ');
+                li.textContent = `${item.name}${toppingText ? ' [' + toppingText + ']' : ''} x${qty} ฿${(itemPrice + toppingPrice) * qty}`;
+                total += (itemPrice + toppingPrice) * qty;
                 list.appendChild(li);
             });
             totalEl.textContent = `รวม ${total} บาท`;
@@ -474,9 +521,12 @@
             renderOrderList();
             const totalText = document.getElementById('orderTotal').textContent;
             let text = 'สรุปออเดอร์\n';
-            Object.values(order).forEach(({ item, qty }) => {
-                const priceText = typeof item.price === 'number' ? `฿${item.price * qty}` : item.price;
-                text += `${item.name} x${qty} ${priceText}\n`;
+            Object.values(order).forEach(({ item, qty, toppings }) => {
+                const toppingPrice = (toppings || []).reduce((s, t) => s + t.price, 0);
+                const itemPrice = typeof item.price === 'number' ? item.price : 0;
+                const priceText = `฿${(itemPrice + toppingPrice) * qty}`;
+                const toppingText = (toppings || []).map(t => t.name).join(', ');
+                text += `${item.name}${toppingText ? ' [' + toppingText + ']' : ''} x${qty} ${priceText}\n`;
             });
             text += totalText;
             const encoded = encodeURIComponent(text);
@@ -513,7 +563,7 @@
                         <p class="text-gray-600 text-xs mb-2 line-clamp-2">${item.description}</p>
                         <div class="flex items-center justify-between mt-auto">
                             <span class="text-lg font-bold text-green-600">${typeof item.price === 'number' ? '฿' + item.price : item.price}</span>
-                            <button onclick="addToOrder('${item.id}')" class="ml-2 bg-green-500 text-white px-2 py-1 rounded text-sm">เพิ่ม</button>
+                            <button onclick="openToppingsModal('${item.id}')" class="ml-2 bg-green-500 text-white px-2 py-1 rounded text-sm">เพิ่ม</button>
                         </div>
                     </div>
                 </div>
