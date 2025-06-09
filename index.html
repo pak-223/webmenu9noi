@@ -453,7 +453,7 @@
         ];
 
         let searchTerm = '';
-        const order = {};
+        const order = [];
         let currentItemId = null;
 
         function openToppingsModal(id) {
@@ -484,11 +484,7 @@
         function addToOrder(id, selectedToppings) {
             const item = menuItems.find(i => i.id === id);
             if (!item) return;
-            if (!order[id]) {
-                order[id] = { item: item, qty: 0, toppings: [] };
-            }
-            order[id].qty++;
-            order[id].toppings = selectedToppings;
+            order.push({ item: item, qty: 1, toppings: selectedToppings });
         }
 
         function openOrderModal() {
@@ -505,7 +501,7 @@
             const totalEl = document.getElementById('orderTotal');
             list.innerHTML = '';
             let total = 0;
-            Object.values(order).forEach(({ item, qty, toppings }) => {
+            order.forEach(({ item, qty, toppings }) => {
                 const li = document.createElement('li');
                 const itemPrice = typeof item.price === 'number' ? item.price : 0;
                 const toppingPrice = (toppings || []).reduce((s, t) => s + t.price, 0);
@@ -521,7 +517,7 @@
             renderOrderList();
             const totalText = document.getElementById('orderTotal').textContent;
             let text = 'สรุปออเดอร์\n';
-            Object.values(order).forEach(({ item, qty, toppings }) => {
+            order.forEach(({ item, qty, toppings }) => {
                 const toppingPrice = (toppings || []).reduce((s, t) => s + t.price, 0);
                 const itemPrice = typeof item.price === 'number' ? item.price : 0;
                 const priceText = `฿${(itemPrice + toppingPrice) * qty}`;
