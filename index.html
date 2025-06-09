@@ -6,6 +6,7 @@
     <title>เมนูอาหาร - นายน้อยข้าวไข่ข้น</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         /* Custom scrollbar for horizontal menu sections (optional, but good for aesthetics) */
         .no-scrollbar::-webkit-scrollbar {
@@ -89,6 +90,25 @@
     <!-- Main Menu Sections Container -->
     <div id="menuSectionsContainer" class="p-4 space-y-8">
         <!-- Menu categories and items will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Floating button to view order summary -->
+    <button id="viewOrderBtn" onclick="openOrderModal()" class="fixed bottom-6 right-6 bg-green-600 text-white rounded-full px-4 py-3 shadow-lg">
+        ดูสรุป
+    </button>
+
+    <!-- Order summary modal -->
+    <div id="orderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-4 w-11/12 max-w-md" id="orderSummary">
+            <h2 class="text-lg font-bold text-center mb-2">สรุปออเดอร์</h2>
+            <ul id="orderList" class="space-y-1 text-sm mb-2"></ul>
+            <p id="orderTotal" class="font-medium text-right"></p>
+            <div class="mt-4 flex justify-end space-x-2">
+                <button onclick="downloadOrderImage()" class="bg-green-500 text-white px-3 py-1 rounded">สร้างภาพ</button>
+                <button onclick="shareOrderText()" class="bg-blue-500 text-white px-3 py-1 rounded">ส่งข้อความ</button>
+                <button onclick="closeOrderModal()" class="bg-gray-300 text-gray-700 px-3 py-1 rounded">ปิด</button>
+            </div>
+        </div>
     </div>
 
     <!-- Footer Section (newly added) -->
@@ -414,6 +434,80 @@
         ];
 
         let searchTerm = '';
+        const order = {};
+
+        function addToOrder(id) {
+            const item = menuItems.find(i => i.id === id);
+            if (!item) return;
+            if (!order[id]) {
+                order[id] = { item: item, qty: 0 };
+            }
+            order[id].qty++;
+            alert(`เพิ่ม ${item.name} แล้ว`);
+        }
+
+        function openOrderModal() {
+            renderOrderList();
+            document.getElementById('orderModal').classList.remove('hidden');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.add('hidden');
+        }
+
+        function renderOrderList() {
+            const list = document.getElementById('orderList');
+            const totalEl = document.getElementById('orderTotal');
+            list.innerHTML = '';
+            let total = 0;
+            Object.values(order).forEach(({ item, qty }) => {
+                const li = document.createElement('li');
+                const itemPrice = typeof item.price === 'number' ? item.price : 0;
+                const priceText = itemPrice ? '฿' + (itemPrice * qty) : item.price;
+                li.className = 'flex justify-between items-center';
+                li.innerHTML = `
+                    <span>${item.name} x${qty} ${priceText}</span>
+                    <div class="space-x-1">
+                        <button onclick="changeQty('${item.id}', -1)" class="bg-red-500 text-white px-2 rounded">-</button>
+                        <button onclick="changeQty('${item.id}', 1)" class="bg-green-500 text-white px-2 rounded">+</button>
+                    </div>
+                `;
+                total += itemPrice * qty;
+                list.appendChild(li);
+            });
+            totalEl.textContent = `รวม ${total} บาท`;
+        }
+
+        function changeQty(id, delta) {
+            if (!order[id]) return;
+            order[id].qty += delta;
+            if (order[id].qty <= 0) {
+                delete order[id];
+            }
+            renderOrderList();
+        }
+
+        function shareOrderText() {
+            renderOrderList();
+            const totalText = document.getElementById('orderTotal').textContent;
+            let text = 'สรุปออเดอร์\n';
+            Object.values(order).forEach(({ item, qty }) => {
+                const priceText = typeof item.price === 'number' ? `฿${item.price * qty}` : item.price;
+                text += `${item.name} x${qty} ${priceText}\n`;
+            });
+            text += totalText;
+            const encoded = encodeURIComponent(text);
+            window.location.href = `line://oaMessage/@kpnn/?${encoded}`;
+        }
+
+        function downloadOrderImage() {
+            html2canvas(document.getElementById('orderSummary')).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'order-summary.png';
+                link.click();
+            });
+        }
 
         // Function to render a single menu item HTML card
         function renderMenuItemCard(item) {
@@ -435,7 +529,8 @@
                         </div>
                         <p class="text-gray-600 text-xs mb-2 line-clamp-2">${item.description}</p>
                         <div class="flex items-center justify-between mt-auto">
-                            <span class="text-lg font-bold text-green-600">฿${item.price}</span>
+                            <span class="text-lg font-bold text-green-600">${typeof item.price === 'number' ? '฿' + item.price : item.price}</span>
+                            <button onclick="addToOrder('${item.id}')" class="ml-2 bg-green-500 text-white px-2 py-1 rounded text-sm">เพิ่ม</button>
                         </div>
                     </div>
                 </div>
