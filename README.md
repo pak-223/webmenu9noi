@@ -36,6 +36,20 @@ referencing these images in your HTML, use paths relative to the file where the
 image is included. Keeping images in this folder helps keep the project
 organized.
 
+## Structure
+
+```
+src/
+  index.html       # Main HTML page
+  styles/
+    main.css       # Extracted styles
+  scripts/
+    main.js        # Menu data and JavaScript logic
+```
+
+Open `src/index.html` directly in your browser to view the menu. The root
+`index.html` simply redirects there for convenience.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
