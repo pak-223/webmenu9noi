@@ -5,7 +5,8 @@ This project hosts a simple restaurant menu written in HTML. The page allows cus
 ## Folder Layout
 
 ```
-src/       # HTML files
+index.html # Main HTML file
+src/       # Additional assets
 scripts/   # JavaScript files
 styles/    # CSS files
 assets/    # Images or other static assets
@@ -13,13 +14,13 @@ assets/    # Images or other static assets
 
 ## Viewing the Site Locally
 
-Open `src/index.html` in your browser or serve the repository with a small HTTP server:
+Open `index.html` in your browser or serve the repository with a small HTTP server:
 
 ```bash
 python3 -m http.server
 ```
 
-Then visit `http://localhost:8000/src/index.html`.
+Then visit `http://localhost:8000/index.html`.
 
 ## Dependencies
 
