@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เมนูอาหาร - กะเพรานายน้อย</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body class="min-h-screen bg-gray-50 font-sans text-gray-800">
+
+    <!-- Header Section (adjusted for new design) -->
+    <div class="header-bg shadow-lg rounded-b-lg text-white">
+        <div class="header-content flex flex-col items-center justify-center text-center p-4">
+            <h1 class="font-bold text-4xl mb-2 sm:text-5xl lg:text-6xl">กะเพรานายน้อย</h1>
+            <p class="text-xl mb-1 sm:text-2xl">กระเพราแท้ ๆ...ที่คุณคิดถึง</p>
+            <p class="text-base text-gray-200 sm:text-lg">少爷打拋饭-热炒香辣, 自选辣度</p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="px-4 pb-4 mt-8 relative z-20"> <!-- Ensure search bar is above overlay -->
+            <div class="relative">
+                <!-- Search icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input
+                    type="text"
+                    id="searchTerm"
+                    placeholder="ค้นหาเมนูอาหาร..."
+                    class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow text-base text-gray-800"
+                    onkeyup="displayMenuSections()"
+                />
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Menu Sections Container -->
+    <div id="menuSectionsContainer" class="p-4 space-y-8">
+        <!-- Menu categories and items will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Floating button to view order summary -->
+    <button id="viewOrderBtn" onclick="openOrderModal()" class="fixed bottom-6 right-6 bg-green-600 text-white rounded-full px-4 py-3 shadow-lg transition-colors">
+        ดูสรุป
+    </button>
+
+    <!-- Order summary modal -->
+    <div id="orderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-4 w-11/12 max-w-lg max-h-[90vh] overflow-y-auto" id="orderSummary">
+            <h2 class="text-lg font-bold text-center mb-2">สรุปออเดอร์</h2>
+            <ul id="orderList" class="space-y-1 text-sm mb-2"></ul>
+            <p id="orderTotal" class="font-medium text-right"></p>
+            <div class="mt-4 flex justify-end space-x-2">
+        
+                <button onclick="shareOrderText()" class="bg-blue-500 text-white px-3 py-1 rounded">ส่งข้อความ</button>
+                <button onclick="closeOrderModal()" class="bg-gray-300 text-gray-700 px-3 py-1 rounded">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toppings selection modal -->
+    <div id="toppingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-4 w-11/12 max-w-sm max-h-[80vh] overflow-y-auto">
+            <h2 class="text-lg font-bold text-center mb-2">เลือกท็อปปิ้ง</h2>
+            <div id="toppingsList" class="space-y-1 text-sm mb-2"></div>
+            <div class="mt-4 flex justify-end space-x-2">
+                <button onclick="confirmToppings()" class="bg-green-500 text-white px-3 py-1 rounded">ตกลง</button>
+                <button onclick="closeToppingsModal()" class="bg-gray-300 text-gray-700 px-3 py-1 rounded">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section (newly added) -->
+    <div class="footer-bg mt-8 rounded-t-lg shadow-lg">
+        <div class="max-w-4xl mx-auto p-6 text-center">
+            <h3 class="font-bold text-xl mb-4">ติดต่อเรา</h3>
+            <div class="space-y-2 text-sm text-gray-200">
+                <p><strong>โทร:</strong> 061-093-2468</p>
+                <p><strong>LINE Official:</strong> @kpnn</p>
+                <p>
+                    <!-- Placeholder QR Code. Replace with your actual QR code URL. -->
+                    <!-- [Image of QR Code] -->
+                    <!-- <img src="https://example.com/your-qr-code.png" alt="QR Code" class="mx-auto my-2 rounded-lg w-24 h-24"/> -->
+                </p>
+                <p><strong>IG:</strong> @kaprao9noi</p>
+                <p><strong>เปิดทุกวัน:</strong> 09:30 - 18:00</p>
+                <p><strong>Delivery via:</strong> GrabFood | LINE MAN | 9noi</p>
+                <p class="text-sm mt-4 text-gray-300">
+                    Mr. Kaprao - Stir-Fried Hot & Fragrant, Spicy as You Like
+                </p>
+                <p class="text-xs text-gray-400">
+                    A new chapter from "Baan Kaprao", Mahasarakham 1997
+                </p>
+            </div>
+            <p class="text-xs text-gray-400 mt-6">&copy; 2024 นายน้อยข้าวไข่ข้น. สงวนลิขสิทธิ์.</p>
+        </div>
+    </div>
+
+    <script src="scripts/main.js"></script>
+</body>
+</html>
