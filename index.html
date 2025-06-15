@@ -102,13 +102,13 @@
     </div>
 
     <!-- Floating button to view order summary -->
-    <button id="viewOrderBtn" onclick="openOrderModal()" class="fixed bottom-6 right-6 bg-green-600 text-white rounded-full px-4 py-3 shadow-lg transition-colors">
+    <button id="viewOrderBtn" onclick="openOrderModal()" class="fixed bottom-6 right-6 bg-green-600 text-white rounded-full px-4 py-3 shadow-lg">
         ดูสรุป
     </button>
 
     <!-- Order summary modal -->
     <div id="orderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-4 w-11/12 max-w-lg max-h-[90vh] overflow-y-auto" id="orderSummary">
+        <div class="bg-white rounded-lg p-4 w-11/12 max-w-md" id="orderSummary">
             <h2 class="text-lg font-bold text-center mb-2">สรุปออเดอร์</h2>
             <ul id="orderList" class="space-y-1 text-sm mb-2"></ul>
             <p id="orderTotal" class="font-medium text-right"></p>
@@ -122,7 +122,7 @@
 
     <!-- Toppings selection modal -->
     <div id="toppingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-4 w-11/12 max-w-sm max-h-[80vh] overflow-y-auto">
+        <div class="bg-white rounded-lg p-4 w-11/12 max-w-sm">
             <h2 class="text-lg font-bold text-center mb-2">เลือกท็อปปิ้ง</h2>
             <div id="toppingsList" class="space-y-1 text-sm mb-2"></div>
             <div class="mt-4 flex justify-end space-x-2">
@@ -464,14 +464,6 @@
         const order = [];
         let currentItemId = null;
 
-        function updateOrderButton() {
-            const btn = document.getElementById('viewOrderBtn');
-            const count = order.reduce((s, o) => s + o.qty, 0);
-            btn.textContent = count > 0 ? `ดูสรุป (${count})` : 'ดูสรุป';
-            btn.classList.toggle('bg-green-600', count === 0);
-            btn.classList.toggle('bg-red-500', count > 0);
-        }
-
         function openToppingsModal(id) {
             currentItemId = id;
             const container = document.getElementById('toppingsList');
@@ -500,14 +492,7 @@
         function addToOrder(id, selectedToppings) {
             const item = menuItems.find(i => i.id === id);
             if (!item) return;
-            const key = id + '|' + selectedToppings.map(t => t.name).sort().join('|');
-            const existing = order.find(o => o.key === key);
-            if (existing) {
-                existing.qty += 1;
-            } else {
-                order.push({ key, item, qty: 1, toppings: selectedToppings });
-            }
-            updateOrderButton();
+            order.push({ item: item, qty: 1, toppings: selectedToppings });
         }
 
         function openOrderModal() {
@@ -519,55 +504,17 @@
             document.getElementById('orderModal').classList.add('hidden');
         }
 
-        function increaseQty(index) {
-            order[index].qty += 1;
-            renderOrderList();
-            updateOrderButton();
-        }
-
-        function decreaseQty(index) {
-            if (order[index].qty > 1) {
-                order[index].qty -= 1;
-            } else {
-                if (confirm('ลบรายการนี้หรือไม่?')) {
-                    order.splice(index, 1);
-                }
-            }
-            renderOrderList();
-            updateOrderButton();
-        }
-
-        function removeOrder(index) {
-            if (confirm('ลบรายการนี้หรือไม่?')) {
-                order.splice(index, 1);
-                renderOrderList();
-                updateOrderButton();
-            }
-        }
-
         function renderOrderList() {
             const list = document.getElementById('orderList');
             const totalEl = document.getElementById('orderTotal');
             list.innerHTML = '';
             let total = 0;
-            order.forEach(({ item, qty, toppings }, index) => {
+            order.forEach(({ item, qty, toppings }) => {
                 const li = document.createElement('li');
                 const itemPrice = typeof item.price === 'number' ? item.price : 0;
                 const toppingPrice = (toppings || []).reduce((s, t) => s + t.price, 0);
                 const toppingText = (toppings || []).map(t => t.name).join(', ');
-                li.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <span class="font-medium">${item.id}</span> ${item.name}${toppingText ? ' [' + toppingText + ']' : ''}
-                            <div class="text-xs text-gray-500">฿${itemPrice} + ฿${toppingPrice}</div>
-                        </div>
-                        <div class="flex items-center space-x-1">
-                            <button onclick="decreaseQty(${index})" class="px-2 bg-gray-200 rounded">-</button>
-                            <span>${qty}</span>
-                            <button onclick="increaseQty(${index})" class="px-2 bg-gray-200 rounded">+</button>
-                            <button onclick="removeOrder(${index})" class="px-2 text-red-600">×</button>
-                        </div>
-                    </div>`;
+                li.textContent = `${item.name}${toppingText ? ' [' + toppingText + ']' : ''} x${qty} ฿${(itemPrice + toppingPrice) * qty}`;
                 total += (itemPrice + toppingPrice) * qty;
                 list.appendChild(li);
             });
@@ -577,21 +524,17 @@
         function shareOrderText() {
             renderOrderList();
             const totalText = document.getElementById('orderTotal').textContent;
-            let text = '📋 สรุปออเดอร์\n';
+            let text = 'สรุปออเดอร์\n';
             order.forEach(({ item, qty, toppings }) => {
                 const toppingPrice = (toppings || []).reduce((s, t) => s + t.price, 0);
                 const itemPrice = typeof item.price === 'number' ? item.price : 0;
                 const priceText = `฿${(itemPrice + toppingPrice) * qty}`;
                 const toppingText = (toppings || []).map(t => t.name).join(', ');
-                text += `🔹 ${item.id} ${item.name}${toppingText ? ' [' + toppingText + ']' : ''} x${qty} ${priceText}\n`;
+                text += `${item.name}${toppingText ? ' [' + toppingText + ']' : ''} x${qty} ${priceText}\n`;
             });
-            text += `💰${totalText}`;
+            text += totalText;
             const encoded = encodeURIComponent(text);
-            if (/Line/i.test(navigator.userAgent)) {
-                window.location.href = `line://oaMessage/@kpnn/?${encoded}`;
-            } else {
-                navigator.clipboard.writeText(text).then(() => alert('คัดลอกสรุปแล้ว'));
-            }
+            window.location.href = `line://oaMessage/@kpnn/?${encoded}`;
         }
 
         function downloadOrderImage() {
@@ -691,7 +634,6 @@
         // Initial render when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             displayMenuSections();
-            updateOrderButton();
         });
     </script>
 </body>
