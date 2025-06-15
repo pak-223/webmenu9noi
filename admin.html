@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-4">
+  <h1 class="text-xl font-bold mb-4">จัดการเมนู</h1>
+  <table id="items" class="min-w-full border-collapse"></table>
+  <script>
+    async function load() {
+      const res = await fetch('/api/menu-items');
+      const items = await res.json();
+      const rows = items.map(item => `
+        <tr class="border-b">
+          <td class="p-2">${item.id}</td>
+          <td class="p-2"><input value="${item.name}" data-id="${item.id}" data-field="name" class="border px-1"/></td>
+          <td class="p-2"><input value="${item.price}" data-id="${item.id}" data-field="price" class="border px-1 w-20"/></td>
+          <td class="p-2"><input value="${item.description}" data-id="${item.id}" data-field="description" class="border px-1"/></td>
+          <td class="p-2"><select data-id="${item.id}" data-field="status" class="border px-1">
+            <option value="พร้อมจำหน่าย" ${item.status === 'พร้อมจำหน่าย' ? 'selected' : ''}>พร้อมจำหน่าย</option>
+            <option value="ยังไม่พร้อมจำหน่าย" ${item.status === 'ยังไม่พร้อมจำหน่าย' ? 'selected' : ''}>ยังไม่พร้อมจำหน่าย</option>
+          </select></td>
+          <td class="p-2"><button data-id="${item.id}" class="save px-2 bg-blue-500 text-white rounded">บันทึก</button></td>
+        </tr>
+      `).join('');
+      document.getElementById('items').innerHTML = rows;
+    }
+
+    document.addEventListener('click', async e => {
+      if (e.target.classList.contains('save')) {
+        const id = e.target.dataset.id;
+        const inputs = document.querySelectorAll(`[data-id="${id}"]`);
+        const body = {};
+        inputs.forEach(i => body[i.dataset.field] = i.value);
+        await fetch('/api/menu-items/' + id, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        alert('บันทึกแล้ว');
+      }
+    });
+
+    load();
+  </script>
+</body>
+</html>
