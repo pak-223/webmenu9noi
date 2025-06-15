@@ -22,17 +22,6 @@ python3 -m http.server
 
 Then visit `http://localhost:8000/index.html`.
 
-### Running the Admin Backend
-
-The project includes a simple Express server for managing menu items. Install dependencies and start the server:
-
-```bash
-npm install
-npm start
-```
-
-By default the server runs on `http://localhost:3000`. Access the admin page at `http://localhost:3000/admin`. The default username is `admin` and the password can be set via the `ADMIN_PASS` environment variable (defaults to `changeme`).
-
 ## Dependencies
 
 The menu relies on external CDN links for styling and screenshot support:
