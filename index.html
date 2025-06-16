@@ -102,8 +102,8 @@
     </div>
 
     <!-- Floating button to view order summary -->
-    <button id="viewOrderBtn" onclick="openOrderModal()" class="fixed bottom-6 right-6 bg-green-600 text-white rounded-full px-4 py-3 shadow-lg">
-        ดูสรุป
+    <button id="viewOrderBtn" onclick="openOrderModal()" class="fixed bottom-6 right-6 bg-gray-400 text-white rounded-full px-4 py-3 shadow-lg">
+        ดูสรุป (0)
     </button>
 
     <!-- Order summary modal -->
@@ -464,6 +464,19 @@
         const order = [];
         let currentItemId = null;
 
+        function updateOrderCount() {
+            const count = order.reduce((s, o) => s + o.qty, 0);
+            const btn = document.getElementById('viewOrderBtn');
+            btn.textContent = `ดูสรุป (${count})`;
+            if (count > 0) {
+                btn.classList.remove('bg-gray-400');
+                btn.classList.add('bg-green-600');
+            } else {
+                btn.classList.remove('bg-green-600');
+                btn.classList.add('bg-gray-400');
+            }
+        }
+
         function openToppingsModal(id) {
             currentItemId = id;
             const container = document.getElementById('toppingsList');
@@ -492,7 +505,23 @@
         function addToOrder(id, selectedToppings) {
             const item = menuItems.find(i => i.id === id);
             if (!item) return;
-            order.push({ item: item, qty: 1, toppings: selectedToppings });
+
+            const toppingsKey = (selectedToppings || [])
+                .map(t => t.name)
+                .sort()
+                .join('|');
+            const existing = order.find(o =>
+                o.item.id === id &&
+                o.toppings.map(t => t.name).sort().join('|') === toppingsKey
+            );
+
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                order.push({ item: item, qty: 1, toppings: selectedToppings });
+            }
+
+            updateOrderCount();
         }
 
         function openOrderModal() {
@@ -509,16 +538,65 @@
             const totalEl = document.getElementById('orderTotal');
             list.innerHTML = '';
             let total = 0;
-            order.forEach(({ item, qty, toppings }) => {
+            order.forEach(({ item, qty, toppings }, index) => {
                 const li = document.createElement('li');
                 const itemPrice = typeof item.price === 'number' ? item.price : 0;
                 const toppingPrice = (toppings || []).reduce((s, t) => s + t.price, 0);
                 const toppingText = (toppings || []).map(t => t.name).join(', ');
-                li.textContent = `${item.name}${toppingText ? ' [' + toppingText + ']' : ''} x${qty} ฿${(itemPrice + toppingPrice) * qty}`;
-                total += (itemPrice + toppingPrice) * qty;
+                const price = (itemPrice + toppingPrice) * qty;
+
+                li.className = 'flex justify-between items-center';
+                const info = document.createElement('span');
+                info.textContent = `${item.name}${toppingText ? ' [' + toppingText + ']' : ''}`;
+
+                const controls = document.createElement('div');
+                controls.className = 'flex items-center space-x-1';
+
+                const minusBtn = document.createElement('button');
+                minusBtn.textContent = '−';
+                minusBtn.className = 'px-2 py-0.5 bg-gray-200 rounded';
+                minusBtn.onclick = () => decreaseQty(index);
+
+                const qtySpan = document.createElement('span');
+                qtySpan.textContent = `x${qty}`;
+
+                const plusBtn = document.createElement('button');
+                plusBtn.textContent = '+';
+                plusBtn.className = 'px-2 py-0.5 bg-gray-200 rounded';
+                plusBtn.onclick = () => increaseQty(index);
+
+                const priceSpan = document.createElement('span');
+                priceSpan.textContent = `฿${price}`;
+                priceSpan.className = 'ml-2';
+
+                controls.appendChild(minusBtn);
+                controls.appendChild(qtySpan);
+                controls.appendChild(plusBtn);
+                controls.appendChild(priceSpan);
+
+                li.appendChild(info);
+                li.appendChild(controls);
+
+                total += price;
                 list.appendChild(li);
             });
             totalEl.textContent = `รวม ${total} บาท`;
+        }
+
+        function increaseQty(index) {
+            order[index].qty += 1;
+            updateOrderCount();
+            renderOrderList();
+        }
+
+        function decreaseQty(index) {
+            if (order[index].qty > 1) {
+                order[index].qty -= 1;
+            } else {
+                order.splice(index, 1);
+            }
+            updateOrderCount();
+            renderOrderList();
         }
 
         function shareOrderText() {
@@ -634,6 +712,7 @@
         // Initial render when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             displayMenuSections();
+            updateOrderCount();
         });
     </script>
 </body>
