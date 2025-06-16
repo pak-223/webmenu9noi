@@ -468,6 +468,13 @@
             const count = order.reduce((s, o) => s + o.qty, 0);
             const btn = document.getElementById('viewOrderBtn');
             btn.textContent = `ดูสรุป (${count})`;
+            if (count > 0) {
+                btn.classList.remove('bg-green-600');
+                btn.classList.add('bg-red-600');
+            } else {
+                btn.classList.remove('bg-red-600');
+                btn.classList.add('bg-green-600');
+            }
         }
 
         function openToppingsModal(id) {
@@ -540,7 +547,7 @@
 
                 li.className = 'flex justify-between items-center';
                 const info = document.createElement('span');
-                info.textContent = `${item.name}${toppingText ? ' [' + toppingText + ']' : ''}`;
+                info.textContent = `${item.id} ${item.name}${toppingText ? ' [' + toppingText + ']' : ''}`;
 
                 const controls = document.createElement('div');
                 controls.className = 'flex items-center space-x-1';
@@ -595,15 +602,15 @@
         function shareOrderText() {
             renderOrderList();
             const totalText = document.getElementById('orderTotal').textContent;
-            let text = 'สรุปออเดอร์\n';
+            let text = '🧾 สรุปออเดอร์\n';
             order.forEach(({ item, qty, toppings }) => {
                 const toppingPrice = (toppings || []).reduce((s, t) => s + t.price, 0);
                 const itemPrice = typeof item.price === 'number' ? item.price : 0;
                 const priceText = `฿${(itemPrice + toppingPrice) * qty}`;
                 const toppingText = (toppings || []).map(t => t.name).join(', ');
-                text += `${item.name}${toppingText ? ' [' + toppingText + ']' : ''} x${qty} ${priceText}\n`;
+                text += `🍽️ ${item.id} ${item.name}${toppingText ? ' [' + toppingText + ']' : ''} x${qty} ${priceText}\n`;
             });
-            text += totalText;
+            text += `💵 ${totalText}`;
             const encoded = encodeURIComponent(text);
             window.location.href = `line://oaMessage/@kpnn/?${encoded}`;
         }
